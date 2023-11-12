@@ -103,28 +103,13 @@ if __name__ == "__main__":
         help="Temperature used in the voting coefficient",
     )
     parser.add_argument(
-        "--pretrained_weights",
-        default="",
-        type=str,
-    )
-    parser.add_argument(
-        "--checkpoint_key",
-        default="teacher",
-        type=str,
-    )
-    parser.add_argument(
-        "--num_workers",
-        default=10,
-        type=int,
-        help="Number of data loading workers per GPU.",
-    )
-    parser.add_argument(
         "--batch_size", default=512, type=int, help="Per-GPU batch-size"
     )
     parser.add_argument(
         "--run_knn", default=False, type=bool, help="Whether to run kNN"
     )
-    parser.add_argument("--model_chkpt_path", default=".", type=str)
+    parser.add_argument("--model_chkpt_path", default="/Users/pegah/Desktop/KOM/GitHub/ssl-ids/checkpoints/scarf1_embedding_dim=45_corruption_rate=0.6_lr=0.001_batch_size=128_epochs=40.pth", type=str)
+    parser.add_argument("--main_dir", default="/Users/pegah/Desktop/KOM/GitHub/ssl-ids/")
 
     args = parser.parse_args()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -139,7 +124,7 @@ if __name__ == "__main__":
     model = model.to(device)
     model.eval()
     train_normal_df = load_pandas_df(
-        "train_normal.csv",
+        args.main_dir+"train_normal.csv",
     )
     train_normal_x, train_normal_y = (
         train_normal_df.iloc[:, :-1],
@@ -150,8 +135,24 @@ if __name__ == "__main__":
         train_normal_y.to_numpy(),
         columns=train_normal_x.columns,
     )
+    unknown_df = load_pandas_df(args.main_dir+"1.csv")
+    normal_unknown_df = unknown_df[unknown_df['Label']==0]
+    attack_unknown_df = unknown_df[unknown_df['Label']==1]
 
-    test_normal_df = load_pandas_df("test_normal.csv")
+    normal_unknown_x, normal_unknown_y = normal_unknown_df.iloc[:, :-1], normal_unknown_df["Label"]
+    attack_unknown_x, attack_unknown_y = attack_unknown_df.iloc[:, :-1], attack_unknown_df["Label"]
+    normal_unknown_ds = ExampleDataset(
+        normal_unknown_x.to_numpy(),
+        normal_unknown_y.to_numpy(),
+        columns=normal_unknown_x.columns,
+    )
+    attack_unknown_ds = ExampleDataset(
+        attack_unknown_x.to_numpy(),
+        attack_unknown_y.to_numpy(),
+        columns=attack_unknown_x.columns,
+    )
+
+    test_normal_df = load_pandas_df(args.main_dir+"test_normal.csv")
     test_normal_x, test_normal_y = test_normal_df.iloc[:, :-1], test_normal_df["Label"]
     test_normal_ds = ExampleDataset(
         test_normal_x.to_numpy(),
@@ -159,7 +160,7 @@ if __name__ == "__main__":
         columns=test_normal_x.columns,
     )
 
-    attack_df = load_pandas_df("attack.csv")
+    attack_df = load_pandas_df(args.main_dir+"attack.csv")
     attack_x, attack_y = attack_df.iloc[:, :-1], attack_df["Label"]
 
     test_attack_ds = ExampleDataset(
@@ -170,52 +171,77 @@ if __name__ == "__main__":
     train_normal_loader = DataLoader(
         train_ds, batch_size=args.batch_size, shuffle=False, drop_last=False
     )
+    
     test_normal_loader = DataLoader(
         test_normal_ds, batch_size=args.batch_size, shuffle=False, drop_last=False
     )
     test_attack_loader = DataLoader(
         test_attack_ds, batch_size=args.batch_size, shuffle=False, drop_last=False
     )
+    
+    unknown_attack_loader = DataLoader(
+        attack_unknown_ds, batch_size=args.batch_size, shuffle=False, drop_last=False
+    )
+
+    unknown_normal_loader = DataLoader(
+        normal_unknown_ds, batch_size=args.batch_size, shuffle=False, drop_last=False
+    )
 
     train_embeddings, train_labels = get_embeddings_labels(
         model, train_normal_loader, device, to_numpy=False, normalize=True
     )
+    
     test_normal_embeddings, test_normal_labels = get_embeddings_labels(
         model, test_normal_loader, device, to_numpy=False, normalize=True
     )
     test_attack_embeddings, test_attack_labels = get_embeddings_labels(
         model, test_attack_loader, device, to_numpy=False, normalize=True
     )
+    
+    attack_unknown_embeddings, attack_unknown_labels = get_embeddings_labels(
+        model, unknown_attack_loader, device, to_numpy=False, normalize=True
+    )
+    normal_unknown_embeddings, normal_unknown_labels = get_embeddings_labels(
+        model, unknown_normal_loader, device, to_numpy=False, normalize=True
+    )
+
     print("Train Embedding Dim", torch.tensor(train_embeddings).size() if type(train_embeddings) is not torch.Tensor else train_embeddings.size())
     print("Test Normal Embedding Dim", torch.tensor(test_normal_embeddings).size() if type(test_normal_embeddings) is not torch.Tensor else test_normal_embeddings.size())
     print("Test Attack Embedding Dim", torch.tensor(test_attack_embeddings).size() if type(test_attack_embeddings) is not torch.Tensor else test_attack_embeddings.size())
+    print("Attack Unknown Embedding Dim", torch.tensor(attack_unknown_embeddings).size() if type(attack_unknown_embeddings) is not torch.Tensor else attack_unknown_embeddings.size())
+    print("Normal Unknown Embedding Dim", torch.tensor(normal_unknown_embeddings).size() if type(normal_unknown_embeddings) is not torch.Tensor else normal_unknown_embeddings.size())
 
-    if args.run_knn:
-        print("###########   KNN on Embedings. Make sure of data correct data labels #############")
-        top1, top5 = knn_classifier(
-            train_embeddings,
-            train_labels,
-            test_normal_embeddings,
-            test_normal_labels,
-            10,
-            0.04,
-            num_classes=5,
-            device=device,
+    # should be modified
+    
+    def auroc_calculations(test_normal_embeddings, test_normal_labels, test_attack_embeddings ):
+        if args.run_knn:
+            print("###########   KNN on Embedings. Make sure of data correct data labels #############")
+            top1, top5 = knn_classifier(
+                train_embeddings,
+                train_labels,
+                test_normal_embeddings,
+                test_normal_labels,
+                10,
+                0.04,
+                num_classes=5,
+                device=device,
+            )
+            print(f"10NN_Top1: {top1}")
+            print(f"10NN_Top5: {top5}")
+
+        scores_in = OOD_classifier(
+            train_embeddings, test_normal_embeddings, -1, 0.04, 1, args
         )
-        print(f"10NN_Top1: {top1}")
-        print(f"10NN_Top5: {top5}")
+        scores_out = OOD_classifier(
+            train_embeddings, test_attack_embeddings, -1, 0.04, 1, args
+        )
 
-    scores_in = OOD_classifier(
-        train_embeddings, test_normal_embeddings, -1, 0.04, 1, args
-    )
-    scores_out = OOD_classifier(
-        train_embeddings, test_attack_embeddings, -1, 0.04, 1, args
-    )
-
-    labels = torch.cat((torch.ones(scores_in.size(0)), torch.zeros(scores_out.size(0))))
-    scores = torch.cat((scores_in, scores_out))
-    auroc = roc_auc_score(labels.numpy(), scores.cpu().numpy())
-    print(f"AUROC: {auroc}")
+        labels = torch.cat((torch.ones(scores_in.size(0)), torch.zeros(scores_out.size(0))))
+        scores = torch.cat((scores_in, scores_out))
+        auroc = roc_auc_score(labels.numpy(), scores.cpu().numpy())
+        print(f"AUROC: {auroc}")
+    
+    auroc_calculations(normal_unknown_embeddings, normal_unknown_labels, attack_unknown_embeddings)
     # # get embeddings for training and test set
     # train_data, test_data, train_target, test_target = get_dataset(args.path, separate_norm_attack=False, test_size=0.2)
     #

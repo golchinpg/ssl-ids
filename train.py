@@ -28,7 +28,7 @@ def train_epoch(model, criterion, train_loader, optimizer, epoch, device):  # de
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Train SCARF")
-    parser.add_argument("--path",  default="allattack_mondaybenign.csv", type=str,)
+    parser.add_argument("--path",  default="/Users/pegah/Desktop/KOM/Datasets/preprocessed_csv/allattack_mondaybenign.csv", type=str,)
     parser.add_argument("--batch_size", default=128, type=int,)
     parser.add_argument("--epochs", default=40, type=int)
     parser.add_argument("--lr", default=1e-3, type=float)
@@ -95,5 +95,5 @@ if __name__ == "__main__":
                 'args': args,
                 'train_data_columns': train_ds.columns + ['Label']
             },
-            f'checkpoints/{log_name}.pth',
+            f'/Users/pegah/Desktop/KOM/GitHub/ssl-ids/checkpoints/{log_name}.pth',
         )
