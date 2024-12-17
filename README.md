@@ -2,6 +2,9 @@
 
 Welcome to the **SSL-IDS** repository! This project provides tools to preprocess network traffic data in PCAP format and convert it into feature files compatible with the models described in the **SSCL-IDS** paper.
 
+## Prerequisites
+- Required Python libraries (see `requirements.txt`)
+
 ## Getting Started
 
 ### Step 1: Traffic Conversion
