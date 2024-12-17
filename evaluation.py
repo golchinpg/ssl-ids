@@ -106,24 +106,19 @@ if __name__ == "__main__":
     # Get the directory of the current script (train.py)
     main_dir = os.path.dirname(os.path.abspath(__file__))
     test_Dastaset_dir = os.path.join(main_dir, 'Dataset/')
+    chk_dir = os.path.join(main_dir, "checkpoints/")
 
-    parser = argparse.ArgumentParser("Evaluation with weighted k-NN")
-    parser.add_argument(
-        "--knn_temperature",
-        default=0.04,
-        type=float,
-        help="Temperature used in the voting coefficient",
-    )
+    parser = argparse.ArgumentParser("Evaluation of SSCL-IDS")
     parser.add_argument(
         "--batch_size", default=256, type=int, help="Per-GPU batch-size"
     )
-    parser.add_argument("--model_chkpt_path", 
-                        default="/home/pegah/Codes/ssl-ids/new_checkpoints/scarf1_embdd_dim=45_lr=0.001_bs=2046_epochs=100_tempr=0.5_V=onlyctu13_cr_rt=0.4_ach_cr_rt0.2_msk_rt0_ach_msk_rt0.pth", type=str)
+    parser.add_argument("--model_chkpt", 
+                        default="scarf1_embdd_dim=45_lr=0.001_bs=2046_epochs=100_tempr=0.5_V=onlyctu13_cr_rt=0.4_ach_cr_rt0.2_msk_rt0_ach_msk_rt0.pth", type=str)
     parser.add_argument("--test_dataset_name",type=str )
 
     args = parser.parse_args()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    ckpt = torch.load(args.model_chkpt_path)
+    ckpt = torch.load(chk_dir+args.model_chkpt)
     train_args = ckpt["args"]
     model = SCARF(
         input_dim=train_args.input_dim,
