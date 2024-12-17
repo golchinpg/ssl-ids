@@ -29,6 +29,8 @@ class NTXent(nn.Module):
         Returns:
             float: loss
         """
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
         batch_size = z_i.size(0)
 
         # compute similarity between the sample's embedding and its corrupted view
@@ -41,7 +43,7 @@ class NTXent(nn.Module):
 
         mask = (
             ~torch.eye(batch_size * 2, batch_size * 2, dtype=torch.bool)
-        ).float()  # .to(device)
+        ).float().to(device)
         numerator = torch.exp(positives / self.temperature)
         denominator = mask * torch.exp(similarity / self.temperature)
 
@@ -62,7 +64,7 @@ def get_embeddings_labels(
     model.eval()
     embeddings = []
     labels = []
-    for anchor, _, label in loader:
+    for anchor, _, _, label in loader:
         anchor = anchor.to(device)
         embeddings.append(model.get_embeddings(anchor))
         labels.append(label)
@@ -76,11 +78,11 @@ def get_embeddings_labels(
     return embeddings, labels
 
 
-def fix_seed(seed):
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
+# def fix_seed(seed):
+#     random.seed(seed)
+#     np.random.seed(seed)
+#     torch.manual_seed(seed)
+#     torch.cuda.manual_seed(seed)
 
 
 def store_pandas_df(pandas_df: pd.DataFrame, path):
@@ -98,3 +100,15 @@ def load_pandas_df(path: str, columns: List =None):
         return df
     else:
         return pd.read_csv(path, header=0, sep=",", usecols=columns)
+
+def seperate_benign_attack_df(df: pd.DataFrame):
+    df_attack = df[df["Label"]==1]
+    df_benign = df[df["Label"]==0]
+    return(df_attack, df_benign)
+
+def concatenate_datasets(datasets: list, saved_path: str=None):
+    concatenated_df = pd.concat(datasets, 
+                                axis=0, ignore_index=True)
+    if saved_path:
+        concatenated_df.to_csv(saved_path, index=False)
+    return concatenated_df
