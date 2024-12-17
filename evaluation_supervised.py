@@ -21,7 +21,7 @@ from sklearn.metrics import (
 from sklearn.ensemble import RandomForestClassifier
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser("Evaluation with weighted k-NN on ImageNet")
+    parser = argparse.ArgumentParser("Evaluation with weighted k-NN")
     parser.add_argument("--supervised_model", default='RF', type= str)
     parser.add_argument("--supervised_training_dataset", default="/home/pegah/Codes/ssl-ids/Dataset/allattack_mondaybenign.csv", type=str)
     parser.add_argument("--model_chkpt_path", default="/home/pegah/Codes/ssl-ids/checkpoints/scarf1_embedding_dim=25_corruption_rate=0.3_lr=0.001_batch_size=2046_epochs=100_temprature=0.5_version=61.pth", type=str)
