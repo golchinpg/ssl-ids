@@ -13,3 +13,11 @@ python traffic_converter.py test.pcap
 Replace test.pcap with the name of your PCAP file.
 
 After preprocessing, the script generates 46 flow features and saves them in the Dataset directory in CSV format. These files are ready for use in training or evaluating the SSCL-IDS model.
+
+Step 2: Evaluation of SSCL-IDS for Your Network Traffic Dataset
+In this phase, you can evaluate the detection performance of SSCL-IDS for your network traffic dataset. Run the evaluation script:
+
+```bash
+python evaluation.py --test_dataset_name "test.csv"
+```
+Replace "test.csv" with the name of your dataset available in the Dataset directory.
