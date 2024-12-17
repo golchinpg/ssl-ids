@@ -6,6 +6,8 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 from sklearn.linear_model import Lasso, LogisticRegression
+import argparse, os
+
 
 
 def converting_pcap(src_path:str):
@@ -68,15 +70,30 @@ def merging_csv(csv_files_path):
     print(merged_data.shape)
     merged_data.to_csv(csv_files_path+'merged_1-6.csv',columns=df.columns, index=False)
 
-#Start Converting pcap file:
-pcap_src_path = '/home/pegah/Codes/ssl-ids/pcap_files/'
-pcap_file_name = 'gan_rce_redteam2_config_30_06-03-2024-07-43-33.pcap'
-csv_destination = '/home/pegah/Codes/ssl-ids/Dataset/'
-csv_name = pcap_file_name.split('.pcap')[0]+'.csv'
-df = converting_pcap(pcap_src_path+pcap_file_name)
-#attack_ip_list = ['147.32.84.165']
-attack_ip_list = ['*']
-df_new = labeling(df, attack_ip_list)
-df_new_preprocessed = preprocessed(df_new, csv_destination+csv_name )
-print(df_new_preprocessed)
+if __name__ == "__main__":
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    print(current_dir)
+
+    parser = argparse.ArgumentParser(description="Convert a PCAP file to a CSV dataset.")
+    parser.add_argument("pcap_file", help="Name of the PCAP file located in the 'pcap_files' directory")
+    args = parser.parse_args()
+
+    # Define paths
+    #Add your pcap file in the pcap_files directory
+    pcap_src_path = os.path.join(current_dir, 'pcap_files/') # Adjust this path if needed
+    
+    csv_destination = os.path.join(current_dir,'Dataset/')  # Adjust this path if needed
+
+    # Extract file name and generate CSV name
+    pcap_file_name = args.pcap_file
+    csv_name = pcap_file_name.split('.pcap')[0] + '.csv'
+
+
+    df = converting_pcap(pcap_src_path+pcap_file_name)
+    #attack_ip_list = ['147.32.84.165']
+    attack_ip_list = ['*']
+    df_new = labeling(df, attack_ip_list)
+    df_new_preprocessed = preprocessed(df_new, csv_destination+csv_name )
+    print(df_new_preprocessed)
+
 
