@@ -24,9 +24,12 @@ class SCARF(nn.Module):
             self,
             input_dim,
             emb_dim,
-            encoder_depth=3,
+            encoder_depth=5,
             head_depth=1,
             corruption_rate=0.6,
+            anchor_corruption_rate=0.0,
+            mask_rate = 0.0,
+            anchor_mask_rate = 0.0,
             encoder=None,
             pretraining_head=None,
     ):
@@ -60,13 +63,19 @@ class SCARF(nn.Module):
         self.encoder.apply(self._init_weights)
         self.pretraining_head.apply(self._init_weights)
         self.corruption_len = int(corruption_rate * input_dim)
+        self.anchor_corruption_len = int(anchor_corruption_rate * input_dim)
+        self.mask_len = int(mask_rate * input_dim)
+        self.anchor_mask_len = int(anchor_mask_rate * input_dim)
 
     def _init_weights(self, module):
         if isinstance(module, nn.Linear):
             torch.nn.init.xavier_uniform_(module.weight)
             module.bias.data.fill_(0.01)
 
-    def forward(self, anchor, random_sample):
+    def forward(self, 
+                anchor, 
+                rnd_sample_1, 
+                rnd_sample_2,):
         batch_size, m = anchor.size()
 
         # 1: create a mask of size (batch size, m) where for each sample we set the
@@ -75,10 +84,27 @@ class SCARF(nn.Module):
 
         corruption_mask = torch.zeros_like(anchor, dtype=torch.bool)
         for i in range(batch_size):
-            corruption_idx = torch.randperm(m)[: self.corruption_len]
-            corruption_mask[i, corruption_idx] = True
+            if self.corruption_len > 0:
+                corruption_idx = torch.randperm(m)[: self.corruption_len]
+                corruption_mask[i, corruption_idx] = True
+                positive = torch.where(corruption_mask, rnd_sample_1, anchor)
 
-        positive = torch.where(corruption_mask, random_sample, anchor)
+            if self.anchor_corruption_len > 0:
+                corruption_idx = torch.randperm(m)[: self.anchor_corruption_len]
+                corruption_mask[i, corruption_idx] = True
+                anchor = torch.where(corruption_mask, rnd_sample_2, anchor)                
+
+            if self.mask_len > 0:
+                corruption_idx = torch.randperm(m)[: self.corruption_len]
+                corruption_mask[i, corruption_idx] = True                
+                mask_sample = torch.zeros_like(anchor)-1
+                positive = torch.where(corruption_mask, mask_sample, anchor)
+
+            if self.anchor_mask_len > 0:
+                corruption_idx = torch.randperm(m)[: self.corruption_len]
+                corruption_mask[i, corruption_idx] = True                
+                mask_sample = torch.zeros_like(anchor)-1
+                anchor = torch.where(corruption_mask, mask_sample, anchor)                
 
         # compute embeddings
         emb_anchor = self.encoder(anchor)
