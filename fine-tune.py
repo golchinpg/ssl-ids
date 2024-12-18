@@ -62,7 +62,9 @@ if __name__ == "__main__":
                         #scarf1_embedding_dim=45_corruption_rate=0.3_lr=0.001_batch_size=2046_epochs=200_temprature=0.5_version=101.pth", type=str)
     parser.add_argument("--dataset_dir", default="/home/pegah/Codes/ssl-ids/Dataset/ISCX-SlowDoS_1.csv")
     parser.add_argument("--num_epochs", default=30 , type=int)
-    parser.add_argument("--apply_smote", default = False)
+    parser.add_argument("--apply_smote", default = True)
+
+
 
     args = parser.parse_args()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -73,6 +75,12 @@ if __name__ == "__main__":
         emb_dim=train_args.embedding_dim,
         corruption_rate=0 #train_args.corruption_rate,
     )
+    #check the availability of the paths
+    if not os.path.isfile(args.model_chkpt_path):
+        raise FileNotFoundError(f"Checkpoint file not found at {args.model_chkpt_path}")
+    if not os.path.isfile(args.dataset_dir):
+        raise FileNotFoundError(f"Dataset file not found at {args.dataset_dir}")
+    
     pretrained_model.load_state_dict(ckpt["model_state_dict"])
     model = FineTuneModel()
     model.encoder = pretrained_model.encoder
