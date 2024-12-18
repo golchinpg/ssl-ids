@@ -53,13 +53,15 @@ class FineTuneModel(nn.Module):
         return x
 
 if __name__ == "__main__":
+    main_dir = os.path.dirname(os.path.abspath(__file__))
     parser = argparse.ArgumentParser("Evaluation with weighted k-NN on ImageNet")
     parser.add_argument(
         "--batch_size", default=1024, type=int, help="Per-GPU batch-size"
     )
     parser.add_argument("--model_chkpt_path", default="/home/pegah/Codes/ssl-ids/new_checkpoints/scarf1_embdd_dim=45_lr=0.001_bs=2046_epochs=100_tempr=0.5_V=900_cr_rt=0.4_ach_cr_rt0.2_msk_rt0_ach_msk_rt0.pth" , type=str)
                         #scarf1_embedding_dim=45_corruption_rate=0.3_lr=0.001_batch_size=2046_epochs=200_temprature=0.5_version=101.pth", type=str)
-    parser.add_argument("--main_dir", default="/home/pegah/Codes/ssl-ids/")
+    parser.add_argument("--dataset_dir", default="/home/pegah/Codes/ssl-ids/Dataset/ISCX-SlowDoS_1.csv")
+    parser.add_argument("--num_epochs", default=30 , type=int)
 
     args = parser.parse_args()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -102,8 +104,8 @@ if __name__ == "__main__":
         return (X_train, y_train, X_test, y_test)
     #['allattack_mondaybenign.csv', 'botnet43_truncated.csv','ISCX-SlowDoS_1.csv',
                         #'merged_1-6.csv', 'botnet_iscx_training.csv']
-    df = load_pandas_df(args.main_dir+"Dataset/ISCX-SlowDoS_1.csv")
-    print('ISCX-SlowDoS_1.csv')
+    df = load_pandas_df(args.dataset_dir) #Add your data points to fine tune the model
+    print(f"Dataset {str(args.dataset_dir).split('/')[-1]} is added to fine-tune!")
     X, y = (
             df.iloc[:, :-1],
             df["Label"],
@@ -162,7 +164,7 @@ if __name__ == "__main__":
         )
         #print('train loader is ready!')
         print('Start training ....')
-        num_epochs = 30
+        num_epochs = args.num_epochs
         for epoch in range(num_epochs):
             model.train()
             for X_train, _, _, y_train in train_loader_smote:
