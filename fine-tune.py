@@ -62,6 +62,7 @@ if __name__ == "__main__":
                         #scarf1_embedding_dim=45_corruption_rate=0.3_lr=0.001_batch_size=2046_epochs=200_temprature=0.5_version=101.pth", type=str)
     parser.add_argument("--dataset_dir", default="/home/pegah/Codes/ssl-ids/Dataset/ISCX-SlowDoS_1.csv")
     parser.add_argument("--num_epochs", default=30 , type=int)
+    parser.add_argument("--apply_smote", default = False)
 
     args = parser.parse_args()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -126,48 +127,48 @@ if __name__ == "__main__":
     #test_embeddings, test_labels = get_embeddings_labels(
     #    model, test_loader, device, to_numpy=True, normalize=True
     #)
-    
+    def create_train_loader(X_train, y_train, bs):
+        train_ds = ExampleDataset(  # onlin normal flows
+                X_train.to_numpy(),
+                y_train.to_numpy(),
+                columns=X.columns,
+            )
+        train_loader = DataLoader(
+            train_ds, batch_size=bs, shuffle=True, drop_last=False
+            )
+        return train_loader
+
     #training_portion = [ 0.00005, 0.0005, 0.001, 0.01,0.5,0.9]# 0.000005,0.00005, 0.00005, 0.0001, 0.0003,
     training_portion = [1]
     for portion in training_portion:
         print('############### train with '+str(portion))
         X_train, y_train = X_use, y_use
-        # Apply SMOTE to the training data
-        smote = SMOTE(random_state=42)
-        X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
-
-        """
-        _, _, X_train, y_train = Split_dataset(
-                    X_use, y_use , portion
-                )
-        print('portion is ', float(len(X_use))*portion)
-        """
         print('X_train:', X_train.shape)
         #print('X_test:',X_test.shape)
         bs = min(X_train.shape[0], 1024)
-        train_ds_smote = ExampleDataset(  # onlin normal flows
-            X_train_resampled.to_numpy(),
-            y_train_resampled.to_numpy(),
-            columns=X.columns,
-        )
-        train_ds = ExampleDataset(  # onlin normal flows
-            X_train.to_numpy(),
-            y_train.to_numpy(),
-            columns=X.columns,
-        )
-        #print('train ds is ready!')
-        train_loader = DataLoader(
-            train_ds, batch_size=bs, shuffle=True, drop_last=False
-        )
-        train_loader_smote = DataLoader(
-            train_ds_smote, batch_size=bs, shuffle=True, drop_last=False
-        )
+        if args.apply_smote == True:
+            # Apply SMOTE to the training data
+            smote = SMOTE(random_state=42)
+            X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
+            train_loader = create_train_loader(X_train_resampled, y_train_resampled, bs)
+            """
+            _, _, X_train, y_train = Split_dataset(
+                        X_use, y_use , portion
+                    )
+            print('portion is ', float(len(X_use))*portion)
+            """
+            
+            
+        else:
+            train_loader = create_train_loader(X_train, y_train, bs)
+
+        
         #print('train loader is ready!')
         print('Start training ....')
         num_epochs = args.num_epochs
         for epoch in range(num_epochs):
             model.train()
-            for X_train, _, _, y_train in train_loader_smote:
+            for X_train, _, _, y_train in train_loader:
                 X_train = X_train.to(device)
                 y_train = y_train.to(device).long()
                 optimizer.zero_grad()
