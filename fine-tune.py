@@ -61,8 +61,8 @@ if __name__ == "__main__":
     parser.add_argument("--model_chkpt_path", default="/home/pegah/Codes/ssl-ids/new_checkpoints/scarf1_embdd_dim=45_lr=0.001_bs=2046_epochs=100_tempr=0.5_V=900_cr_rt=0.4_ach_cr_rt0.2_msk_rt0_ach_msk_rt0.pth" , type=str)
                         #scarf1_embedding_dim=45_corruption_rate=0.3_lr=0.001_batch_size=2046_epochs=200_temprature=0.5_version=101.pth", type=str)
     parser.add_argument("--dataset_dir", default="/home/pegah/Codes/ssl-ids/Dataset/ISCX-SlowDoS_1.csv")
-    parser.add_argument("--batch_size", default=1024, type=int)
-    parser.add_argument("learning_rate", default=0.001)
+    parser.add_argument("--batch_size_fine_tuning", default=1024, type=int)
+    parser.add_argument("--learning_rate", default=0.001)
     parser.add_argument("--num_epochs", default=30 , type=int)
     parser.add_argument("--apply_smote", default = True)
 
@@ -113,30 +113,7 @@ if __name__ == "__main__":
         )
         print("shape of X_train and X_test:", X_train.shape, X_test.shape)
         return (X_train, y_train, X_test, y_test)
-    #['allattack_mondaybenign.csv', 'botnet43_truncated.csv','ISCX-SlowDoS_1.csv',
-                        #'merged_1-6.csv', 'botnet_iscx_training.csv']
-    df = load_pandas_df(args.dataset_dir) #Add your data points to fine tune the model
-    print(f"Dataset {str(args.dataset_dir).split('/')[-1]} is added to fine-tune!")
-    X, y = (
-            df.iloc[:, :-1],
-            df["Label"],
-        )
-    X_use, y_use, X_test, y_test = Split_dataset(
-                    X, y, 0.3
-                )
-    test_ds = ExampleDataset(  # onlin normal flows
-        X_test.to_numpy(),
-        y_test.to_numpy(),
-        columns=X.columns,
-    )
-    print('test ds is ready!')
-    test_loader = DataLoader(
-        test_ds, batch_size=args.batch_size, shuffle=False, drop_last=False
-    )
-    print('test loader is ready!')
-    #test_embeddings, test_labels = get_embeddings_labels(
-    #    model, test_loader, device, to_numpy=True, normalize=True
-    #)
+    
     def create_train_loader(X_train, y_train, bs):
         train_ds = ExampleDataset(  # onlin normal flows
                 X_train.to_numpy(),
@@ -147,6 +124,25 @@ if __name__ == "__main__":
             train_ds, batch_size=bs, shuffle=True, drop_last=False
             )
         return train_loader
+    #Add your data points to fine tune the model
+    df = load_pandas_df(args.dataset_dir) 
+    print(f"#####   Dataset {str(args.dataset_dir).split('/')[-1]} is added to fine-tune SSCL-IDS!")
+    X, y = (
+            df.iloc[:, :-1],
+            df["Label"],
+        )
+    X_use, y_use, X_test, y_test = Split_dataset(
+                    X, y, 0.3
+                )
+
+    test_loader = create_train_loader(X_test, y_test, args.batch_size)
+    
+
+    print('test loader is ready!')
+    #test_embeddings, test_labels = get_embeddings_labels(
+    #    model, test_loader, device, to_numpy=True, normalize=True
+    #)
+    
 
     #training_portion = [ 0.00005, 0.0005, 0.001, 0.01,0.5,0.9]# 0.000005,0.00005, 0.00005, 0.0001, 0.0003,
     training_portion = [1]
@@ -155,7 +151,7 @@ if __name__ == "__main__":
         X_train, y_train = X_use, y_use
         print('X_train:', X_train.shape)
         #print('X_test:',X_test.shape)
-        bs = min(X_train.shape[0], args.batch_size)
+        bs = min(X_train.shape[0], args.batch_size_fine_tuning)
         if args.apply_smote == True:
             # Apply SMOTE to the training data
             smote = SMOTE(random_state=42)
