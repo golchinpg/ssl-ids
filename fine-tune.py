@@ -61,6 +61,8 @@ if __name__ == "__main__":
     parser.add_argument("--model_chkpt_path", default="/home/pegah/Codes/ssl-ids/new_checkpoints/scarf1_embdd_dim=45_lr=0.001_bs=2046_epochs=100_tempr=0.5_V=900_cr_rt=0.4_ach_cr_rt0.2_msk_rt0_ach_msk_rt0.pth" , type=str)
                         #scarf1_embedding_dim=45_corruption_rate=0.3_lr=0.001_batch_size=2046_epochs=200_temprature=0.5_version=101.pth", type=str)
     parser.add_argument("--dataset_dir", default="/home/pegah/Codes/ssl-ids/Dataset/ISCX-SlowDoS_1.csv")
+    parser.add_argument("--batch_size", default=1024, type=int)
+    parser.add_argument("learning_rate", default=0.001)
     parser.add_argument("--num_epochs", default=30 , type=int)
     parser.add_argument("--apply_smote", default = True)
 
@@ -93,7 +95,7 @@ if __name__ == "__main__":
     #    print(par1 == par2)
 
     
-    learning_rate = 0.001
+    learning_rate = args.learning_rate
     # Create the fine-tune model
     #fine_tune_model = FineTuneModel(model, input_dim, num_classes)
     #fine_tune_model = fine_tune_model.to(device)
@@ -153,7 +155,7 @@ if __name__ == "__main__":
         X_train, y_train = X_use, y_use
         print('X_train:', X_train.shape)
         #print('X_test:',X_test.shape)
-        bs = min(X_train.shape[0], 1024)
+        bs = min(X_train.shape[0], args.batch_size)
         if args.apply_smote == True:
             # Apply SMOTE to the training data
             smote = SMOTE(random_state=42)
