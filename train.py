@@ -80,12 +80,11 @@ def train(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Train SCARF")
-    parser.add_argument("--dataset_path",  default="/home/pegah/Codes/ssl-ids/Dataset/merged_1-6.csv", type=str,)
+    parser.add_argument("--dataset_path", required = True,  default="/home/pegah/Codes/ssl-ids/Dataset/merged_1-6.csv", type=str,)
     parser.add_argument("--batch_size", default=2046, type=int,)
     parser.add_argument("--epochs", default=100, type=int)
     parser.add_argument("--lr", default=1e-3, type=float)
     parser.add_argument("--embedding_dim", default=45, type=int)
-    parser.add_argument("--corruption_rate", default=0.3, type=float)
     parser.add_argument("--temprature", default=0.5, type=float)
     parser.add_argument("--version", default='onlyunsw', type=str)
     parser.add_argument("--positive_cr_list", default=[0.4], type=list , help="list of corruption rates to create positive pair")
