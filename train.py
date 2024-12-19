@@ -80,7 +80,7 @@ def train(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Train SCARF")
-    parser.add_argument("--path",  default="/home/pegah/Codes/ssl-ids/", type=str,)
+    parser.add_argument("--dataset_path",  default="/home/pegah/Codes/ssl-ids/Dataset/merged_1-6.csv", type=str,)
     parser.add_argument("--batch_size", default=2046, type=int,)
     parser.add_argument("--epochs", default=100, type=int)
     parser.add_argument("--lr", default=1e-3, type=float)
@@ -88,6 +88,11 @@ if __name__ == "__main__":
     parser.add_argument("--corruption_rate", default=0.3, type=float)
     parser.add_argument("--temprature", default=0.5, type=float)
     parser.add_argument("--version", default='onlyunsw', type=str)
+    parser.add_argument("--positive_cr_list", default=[0.4], type=list , help="list of corruption rates to create positive pair")
+    parser.add_argument("--anchor_cr_list", default= [0.2], type = list, help="list of rates for creating currepted anchor")
+    parser.add_argument("--positive_mr_list", default = [0], type = list,  help="list of positive mask rates")
+    parser.add_argument("--anchor_mr_list", default = [0], type=list,  help="list of anchor mask rates")
+    
     parser.add_argument(
         "--chkpt_path",
         type=str,
@@ -96,17 +101,23 @@ if __name__ == "__main__":
     #concatenated_df_normal.csv
     print('batchsize:', args.batch_size)
     
-    print('training with only cicbotnet benign flows ...')
+    print(f"training with only {args.dataset_path.split('/')[-1]} benign flows ...")
     x_train_normal,x_test_normal,_,y_train_normal,y_test_normal,_ = get_dataset(
-        args.path+"Dataset/merged_1-6.csv", training_with_attacks= True,
+        args.dataset_path, training_with_attacks= True,
         separate_norm_attack= True, test_size=0.3)
     print(y_train_normal.value_counts())
+    #create torch dataset
     train_ds = ExampleDataset(
         x_train_normal.to_numpy(),
         y_train_normal.to_numpy(),
         columns=x_train_normal.columns,
     )
-    store_pandas_df(x_train_normal, args.path+'training_merged_1-6.csv') 
+    #Create the tmp_dir
+    tmp_dir = os.path.join(current_dir, 'tmp_folder/')
+    # Create the tmp_folder if it doesn't exist
+    os.makedirs(tmp_dir, exist_ok=True)
+    print(tmp_dir+str(args.dataset_path.split('/')[-1]))
+    store_pandas_df(x_train_normal, tmp_dir+str(args.dataset_path.split('/')[-1].split('.')[0])+"_training_normalflows.csv") 
 
     print("start training ...")
 
@@ -115,10 +126,14 @@ if __name__ == "__main__":
 
     train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, drop_last=True)
     args.input_dim = train_ds.shape[1]
-    for corr_rate in [0.4]:
-        for anchor_corr_rate in [0.2]:
-            for mask_rate in [0]:
-                for anchor_mask_rate in [0]:
+    cr = args.positive_cr_list
+    cr_a = args.anchor_cr_list
+    mr = args.positive_mr_list
+    mr_a = args.anchor_mr_list
+    for corr_rate in cr:
+        for anchor_corr_rate in cr_a:
+            for mask_rate in mr:
+                for anchor_mask_rate in mr_a:
                     args.corruption_rate = corr_rate
                     args.anchor_corruption_rate = anchor_corr_rate
                     args.mask_rate = mask_rate
