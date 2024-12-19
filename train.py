@@ -64,7 +64,7 @@ def train(args):
             global_step=epoch,
             walltime=0.001,
         )
-        print("saving model")
+        print("**** Saving the model!")
         torch.save(
             {
                 "model_state_dict": model.state_dict(),
@@ -116,7 +116,6 @@ if __name__ == "__main__":
     tmp_dir = os.path.join(current_dir, 'tmp_folder/')
     # Create the tmp_folder if it doesn't exist
     os.makedirs(tmp_dir, exist_ok=True)
-    print(tmp_dir+str(args.dataset_path.split('/')[-1]))
     store_pandas_df(x_train_normal, tmp_dir+str(args.dataset_path.split('/')[-1].split('.')[0])+"_training_normalflows.csv") 
 
     print("start training ...")
@@ -134,6 +133,7 @@ if __name__ == "__main__":
         for anchor_corr_rate in cr_a:
             for mask_rate in mr:
                 for anchor_mask_rate in mr_a:
+                    print(f" ******   Training for the corruption rate of {corr_rate}, anchor corruption rate of {anchor_corr_rate}, mask rate of {mask_rate}, and anchor mask rate of {anchor_mask_rate} ****")
                     args.corruption_rate = corr_rate
                     args.anchor_corruption_rate = anchor_corr_rate
                     args.mask_rate = mask_rate
