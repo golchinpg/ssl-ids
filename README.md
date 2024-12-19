@@ -36,14 +36,14 @@ If you want to fine-tune SSCL-IDS models with additional MLP layers on your traf
 python fine_tune.py \
     --model_chkpt_path <path_to_model_checkpoint> \
     --dataset_dir <path_to_dataset> \
-    --batch_size 1024 \
+    --batch_size_fine_tuning 1024 \
     --num_epochs 30 \
     --learning_rate 0.001 \
     --apply_smote True \
 ```
     - `--model_chkpt_path`: Path to the model checkpoint file
     - `--dataset_dir`: Path to your network traffic dataset
-    - `--batch_size`: Batch size for training
+    - `--batch_size_fine_tuning`: Batch size for training
     - `--num_epochs`: Number of training epochs
     - `--learning_rate`: Learning rate for the optimizer
     - `--apply_smote`: Apply SMOTE oversampling (if your network traffic dataset is imbalanced)
