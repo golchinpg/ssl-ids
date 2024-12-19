@@ -1,6 +1,7 @@
 # Self-Supervised Contrastive Learning-based Intrusion Detection System
 
-Welcome to the **SSL-IDS** repository! This project provides an intrusion detection system based on Self-Supervised Contrastive learning.The paper was published at IFIP Networking Conference, 2024 (https://www.kom.tu-darmstadt.de/assets/178ce317-528a-4013-944e-1cdf00f8c852/GRH24.pdf). 
+Welcome to the **SSL-IDS** repository! This project provides an intrusion detection system based on Self-Supervised Contrastive learning.
+This repository is the code of paper **"SSCL-IDS: Enhancing Generalization of Intrusion Detection with Self-Supervised Contrastive Learning"** which was published at IFIP Networking Conference, 2024 (https://www.kom.tu-darmstadt.de/assets/178ce317-528a-4013-944e-1cdf00f8c852/GRH24.pdf). 
 
 If you use any script of this repository, please cite the work:
 
