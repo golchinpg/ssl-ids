@@ -69,13 +69,22 @@ python train.py --dataset_path <path_to_your_prepared_dataset_for_training> \
     --lr 0.001 \
     --embedding_dim 45 \
     --temprature 0.5 \ 
-    --version "v1" \
+    --version "experiment 1" \
     --positive_cr_list [0.3, 0.4] \
-    --anchor_cr_list [0.1, 0.2] \
+    --anchor_cr_list [0.1] \
     --positive_mr_list [0.3,0.5] \
-    --anchor_mr_list [0.3, 0.6] \
+    --anchor_mr_list [0] \
 ```
 
-    
+    - `--dataset_path (str): Path to the CSV dataset file.
+    - `--batch_size (int): Batch size for training.
+    - `--epochs (int): Number of training epochs.
+    - `--lr (float): Learning rate for the optimizer.
+    - `--embedding_dim (int): Dimensionality of the SCARF embedding space.
+    - `--temprature (float): Temperature parameter for the NTXent loss.
+    - `--positive_cr_list (list): list of Corruption rates for creating positive pairs.
+    - `--anchor_cr_list (list): list of Corruption rates for anchors.
+    - `--positive_mr_list (list): list of Mask rates for creating positive pairs.
+    - `--anchor_mr_list (list): list of Mask rates for anchors.
 
 
