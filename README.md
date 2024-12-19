@@ -89,6 +89,7 @@ python train.py --dataset_path <path_to_your_prepared_dataset_for_training> \
     --anchor_cr_list [0.1] \
     --positive_mr_list [0.3,0.5] \
     --anchor_mr_list [0] \
+    --chkpt_path <checkpoint_path> \
 ```
 
     - `--dataset_path (str): Path to the CSV dataset file.
@@ -101,5 +102,6 @@ python train.py --dataset_path <path_to_your_prepared_dataset_for_training> \
     - `--anchor_cr_list (list): list of Corruption rates for anchors.
     - `--positive_mr_list (list): list of Mask rates for creating positive pairs.
     - `--anchor_mr_list (list): list of Mask rates for anchors.
+    - `--chkpt_path: The directory in which you want to save the checkpoint
 
 
