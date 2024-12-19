@@ -1,6 +1,11 @@
 # Self-Supervised Contrastive Learning-based Intrusion Detection System
 
-Welcome to the **SSL-IDS** repository! This project provides tools to preprocess network traffic data in PCAP format and convert it into feature files compatible with the models described in the **SSCL-IDS** paper.
+Welcome to the **SSL-IDS** repository! This project provides an intrusion detection system based on Self-Supervised Contrastive learning.The paper was published at IFIP Networking Conference, 2024 (https://www.kom.tu-darmstadt.de/assets/178ce317-528a-4013-944e-1cdf00f8c852/GRH24.pdf). 
+
+If you use any script of this repository, please cite the work:
+
+P. Golchin, N. Rafiee, M. Hajizadeh, A. Khalil, R. Kundel and R. Steinmetz, "SSCL-IDS: Enhancing Generalization of Intrusion Detection with Self-Supervised Contrastive Learning," 2024 IFIP Networking Conference (IFIP Networking), Thessaloniki, Greece, 2024, pp. 404-412, doi: 10.23919/IFIPNetworking62109.2024.10619725.
+keywords: {Training;Degradation;Transfer learning;Training data;Network intrusion detection;Telecommunication traffic;Contrastive learning;Network Intrusion Detection System;Machine Learning;Self-Supervised Learning},
 
 ## Prerequisites
 - Required Python libraries (see `requirements.txt`)
