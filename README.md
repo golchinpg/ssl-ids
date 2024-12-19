@@ -8,12 +8,20 @@ If you use any script of this repository, please cite the work:
 P. Golchin, N. Rafiee, M. Hajizadeh, A. Khalil, R. Kundel and R. Steinmetz, "SSCL-IDS: Enhancing Generalization of Intrusion Detection with Self-Supervised Contrastive Learning," 2024 IFIP Networking Conference (IFIP Networking), Thessaloniki, Greece, 2024, pp. 404-412, doi: 10.23919/IFIPNetworking62109.2024.10619725.
 keywords: {Training;Degradation;Transfer learning;Training data;Network intrusion detection;Telecommunication traffic;Contrastive learning;Network Intrusion Detection System;Machine Learning;Self-Supervised Learning},
 
-## Prerequisites
+## Table of Content
+
+- [**Prerequisites**](##prerequisites)
+- [**Create a Compatible Network Traffic Dataset**](##preprocessing)
+- [**Evaluating SSCL-IDS with Your Network Traffic Dataset**](##evaluation )
+- [**Fine-tune SSCL-IDS with Your Network Traffic Dataset**](##fine_tune)
+- [**Training SSCL-IDS from Scratch**](##training)
+  
+## <span id="prerequisites">Prerequisites</span>
 - Required Python libraries (see `requirements.txt`)
 
 ## Getting Started
 
-### Preprocessing: Traffic Conversion
+## <span id="preprocessing">Preprocessing: Traffic Conversion</span>
 The first step is to convert the traffic data from a PCAP file into feature files that can be used for training or testing with the models. Use the script `traffic_converter.py` to perform the conversion:
 
 ```bash
@@ -23,7 +31,7 @@ Replace test.pcap with the name of your PCAP file.
 
 After preprocessing, the script generates 46 flow features and saves them in the Dataset directory in CSV format. These files are ready for use in training or evaluating the SSCL-IDS model.
 
-### Evaluating SSCL-IDS with Your Network Traffic Dataset
+## <span id="evaluation">Evaluating SSCL-IDS with Your Network Traffic Dataset</span>
 In this phase, you can evaluate the detection performance of SSCL-IDS for your network traffic dataset. Run the evaluation script:
 
 ```bash
@@ -40,7 +48,8 @@ python evaluation.py \
     - `--train_from_scratch`: This will change the assumption of training data with only normal flows. If you only want to evaluate the SSCL-IDS with your dataset, set it False. If you wanna train the SSCL-IDS from scratch and then evaluate it set it as True.
 The script will output the AUROC score and AUROC for maximum cosine similarity for the evaluation dataset.
 
-### Fine-tune SSCL-IDS with Your Network Traffic Dataset
+## <span id="fine_tune">Fine-tune SSCL-IDS with Your Network Traffic Dataset</span>
+
 If you want to fine-tune SSCL-IDS models with additional MLP layers on your traffic network dataset, which has the ground truth labels (0: benign and 1:attack), it is possible to run the following script:
 ```bash
 python fine_tune.py \
@@ -60,7 +69,7 @@ python fine_tune.py \
 
 This script will output the classification report.
 
-### Training SSCL-IDS with Your Data from Scratch
+## <span id="training">Training SSCL-IDS with Your Data from Scratch</span>
 The **SSCL-IDS** is trained only with normal network traffic flows. If you want to train it from scratch with your normal network traffic, use the following script:
 ```bash
 python train.py --dataset_path <path_to_your_prepared_dataset_for_training> \
