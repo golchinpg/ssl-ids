@@ -87,6 +87,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--test_dataset_name", type=str, required=True, help="Test dataset filename (CSV)"
     )
+    parser.add_argument("--train_from_scratch", default = False, type = str, required=True, help = "if the model is trained from scratch, the contrastive is made by the normal training dataset that was created")
 
     args = parser.parse_args()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -101,9 +102,15 @@ if __name__ == "__main__":
     model.load_state_dict(ckpt["model_state_dict"])
     model = model.to(device)
     model.eval()
+    print(args.train_from_scratch)
 
     # Load training data
-    train_normal_df = load_pandas_df(os.path.join(main_dir, 'training_cicbotnet.csv'))
+    #tmp_dir+str(args.dataset_path.split('/')[-1].split('.')[0])+"_training_normalflows.csv"
+    if args.train_from_scratch == True:
+        train_normal_df = load_pandas_df(os.path.join(main_dir, "tmp_folder/"+args.test_dataset_name))
+    else:
+        train_normal_df = load_pandas_df(os.path.join(main_dir, 'training_cicbotnet.csv'))
+    
     train_label_df = pd.DataFrame({'Label': [0] * len(train_normal_df)})
     train_normal_x, train_normal_y = train_normal_df, train_label_df
     train_ds = ExampleDataset(train_normal_x.to_numpy(), train_normal_y.to_numpy(), columns=train_normal_x.columns)
